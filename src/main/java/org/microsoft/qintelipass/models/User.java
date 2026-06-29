@@ -1,10 +1,12 @@
 package org.microsoft.qintelipass.models;
 
+import org.microsoft.qintelipass.enums.UserStatus;
+
 public class User {
     private String id;
     private String phone;
     private String wechatOpenId;
-    private String status;
+    private UserStatus status;
     private String name;
     
     public User() {}
@@ -18,8 +20,8 @@ public class User {
     public String getWechatOpenId() { return wechatOpenId; }
     public void setWechatOpenId(String wechatOpenId) { this.wechatOpenId = wechatOpenId; }
     
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public UserStatus getStatus() { return status; }
+    public void setStatus(UserStatus status) { this.status = status; }
     
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

@@ -37,7 +37,7 @@ public class WechatLoginStrategy implements ILoginStrategy {
             return new ResponseBody(false, "User not found.");
         }
         
-        if (UserStatus.DEACTIVATED.name().equals(user.getStatus())) {
+        if (UserStatus.DEACTIVATED.equals(user.getStatus())) {
             return new ResponseBody(false, "Your account has been deactivated");
         }
         

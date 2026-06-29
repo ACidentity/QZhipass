@@ -22,7 +22,7 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
     private UserService userService;
     
     public boolean validate(String phone, String smsCode) {
-        return phone.length() != 11 && smsCode.length() != 6;
+        return phone == null || smsCode == null || phone.length() != 11 || smsCode.length() != 6;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
         }
         
         User user = userService.getUserByPhone(phone);
-        if (user != null && UserStatus.DEACTIVATED.name().equals(user.getStatus())) {
+        if (user != null && UserStatus.DEACTIVATED.equals(user.getStatus())) {
             return new ResponseBody(false, "Your account has been deactivated");
         }
         

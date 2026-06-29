@@ -14,15 +14,18 @@ import java.util.Map;
 public class UserService {
 
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
 
     private static final String USER_KEY_PREFIX = "user:";
     private static final String PHONE_INDEX_PREFIX = "user:phone:";
     private static final String WECHAT_INDEX_PREFIX = "user:wechat:";
 
     public User getUserById(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return null;
+        }
         String key = USER_KEY_PREFIX + userId;
-        Map<Object, Object> data = redisTemplate.opsForHash().entries(key);
+        Map<String, String> data = (Map<String, String>) (Map<?, ?>) redisTemplate.opsForHash().entries(key);
         if (data == null || data.isEmpty()) {
             return null;
         }
@@ -30,7 +33,10 @@ public class UserService {
     }
 
     public User getUserByPhone(String phone) {
-        String userId = (String) redisTemplate.opsForValue().get(PHONE_INDEX_PREFIX + phone);
+        if (phone == null || phone.trim().isEmpty()) {
+            return null;
+        }
+        String userId = redisTemplate.opsForValue().get(PHONE_INDEX_PREFIX + phone);
         if (userId == null) {
             return null;
         }
@@ -38,7 +44,10 @@ public class UserService {
     }
 
     public User getUserByWechatOpenId(String wechatOpenId) {
-        String userId = (String) redisTemplate.opsForValue().get(WECHAT_INDEX_PREFIX + wechatOpenId);
+        if (wechatOpenId == null || wechatOpenId.trim().isEmpty()) {
+            return null;
+        }
+        String userId = redisTemplate.opsForValue().get(WECHAT_INDEX_PREFIX + wechatOpenId);
         if (userId == null) {
             return null;
         }
@@ -50,8 +59,8 @@ public class UserService {
         var keys = redisTemplate.keys(USER_KEY_PREFIX + "*");
         if (keys != null) {
             for (String key : keys) {
-                if (redisTemplate.type(key).name().equals("HASH")) {
-                    Map<Object, Object> data = redisTemplate.opsForHash().entries(key);
+                if (redisTemplate.type(key) != null && redisTemplate.type(key).name().equals("HASH")) {
+                    Map<String, String> data = (Map<String, String>) (Map<?, ?>) redisTemplate.opsForHash().entries(key);
                     String userId = key.replace(USER_KEY_PREFIX, "");
                     users.add(mapToUser(userId, data));
                 }
@@ -61,10 +70,13 @@ public class UserService {
     }
 
     public void saveUser(User user) {
+        if (user == null || user.getId() == null) {
+            return;
+        }
         String key = USER_KEY_PREFIX + user.getId();
         redisTemplate.opsForHash().put(key, "phone", user.getPhone() != null ? user.getPhone() : "");
         redisTemplate.opsForHash().put(key, "wechatOpenId", user.getWechatOpenId() != null ? user.getWechatOpenId() : "");
-        redisTemplate.opsForHash().put(key, "status", user.getStatus() != null ? user.getStatus() : UserStatus.NORMAL.name());
+        redisTemplate.opsForHash().put(key, "status", user.getStatus() != null ? user.getStatus().name() : UserStatus.NORMAL.name());
         redisTemplate.opsForHash().put(key, "name", user.getName() != null ? user.getName() : "");
         
         if (user.getPhone() != null && !user.getPhone().isEmpty()) {
@@ -76,30 +88,47 @@ public class UserService {
     }
 
     public boolean deactivateUser(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return false;
+        }
         User user = getUserById(userId);
         if (user == null) {
             return false;
         }
-        if (UserStatus.DEACTIVATED.name().equals(user.getStatus())) {
+        if (UserStatus.DEACTIVATED.equals(user.getStatus())) {
             return false;
         }
-        user.setStatus(UserStatus.DEACTIVATED.name());
+        user.setStatus(UserStatus.DEACTIVATED);
         saveUser(user);
         return true;
     }
 
     public boolean isUserDeactivated(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return false;
+        }
         User user = getUserById(userId);
-        return user != null && UserStatus.DEACTIVATED.name().equals(user.getStatus());
+        return user != null && UserStatus.DEACTIVATED.equals(user.getStatus());
     }
 
-    private User mapToUser(String userId, Map<Object, Object> data) {
+    private User mapToUser(String userId, Map<String, String> data) {
         User user = new User();
         user.setId(userId);
-        user.setPhone((String) data.get("phone"));
-        user.setWechatOpenId((String) data.get("wechatOpenId"));
-        user.setStatus((String) data.get("status"));
-        user.setName((String) data.get("name"));
+        user.setPhone(data.get("phone"));
+        user.setWechatOpenId(data.get("wechatOpenId"));
+        
+        String statusStr = data.get("status");
+        if (statusStr != null) {
+            try {
+                user.setStatus(UserStatus.valueOf(statusStr));
+            } catch (IllegalArgumentException e) {
+                user.setStatus(UserStatus.NORMAL);
+            }
+        } else {
+            user.setStatus(UserStatus.NORMAL);
+        }
+        
+        user.setName(data.get("name"));
         return user;
     }
 }
