@@ -5,7 +5,6 @@ import org.microsoft.qintelipass.ILoginStrategy;
 import org.microsoft.qintelipass.LoginStrategyFactory;
 import org.microsoft.qintelipass.request.LoginRequest;
 import org.microsoft.qintelipass.response.ResponseBody;
-import org.microsoft.qintelipass.services.ISmsService;
 import org.microsoft.qintelipass.services.SmsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
