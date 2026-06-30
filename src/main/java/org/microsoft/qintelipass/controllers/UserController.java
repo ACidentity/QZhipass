@@ -20,15 +20,15 @@ import java.util.stream.Collectors;
 public class UserController {
     @Autowired
     private UserService userService;
-    
+
     @GetMapping("/users")
     public ResponseEntity<?> getUsers(
             @RequestParam(value = "q", required = false) String keyword,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-        
+
         List<User> allUsers = userService.getAllUsers();
-        
+
         // 搜索过滤
         List<User> filteredUsers = allUsers;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -38,32 +38,32 @@ public class UserController {
                         || (u.getPhone() != null && u.getPhone().contains(keyword)))
                 .collect(Collectors.toList());
         }
-        
+
         // 分页
         int startIndex = (page - 1) * size;
         int endIndex = Math.min(startIndex + size, filteredUsers.size());
-        
+
         if (startIndex >= filteredUsers.size()) {
             startIndex = 0;
             endIndex = Math.min(size, filteredUsers.size());
         }
-        
+
         List<User> pageUsers = filteredUsers.subList(startIndex, endIndex);
-        
+
         // 返回格式：{ total: 100, items: [...] }
         Map<String, Object> response = new HashMap<>();
         response.put("total", filteredUsers.size());
         response.put("items", pageUsers);
-        
+
         return ResponseEntity.ok(response);
     }
-    
+
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<?> deactivateUser(@PathVariable String userId) {
         if (userId == null || userId.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid user ID"));
         }
-        
+
         boolean success = userService.deactivateUser(userId);
         if (success) {
             return ResponseEntity.ok(Map.of("success", true, "message", "User deactivated successfully"));

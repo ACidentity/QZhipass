@@ -5,7 +5,7 @@ import org.microsoft.qintelipass.ILoginStrategy;
 import org.microsoft.qintelipass.enums.UserStatus;
 import org.microsoft.qintelipass.models.User;
 import org.microsoft.qintelipass.response.ResponseBody;
-import org.microsoft.qintelipass.services.RedisService;
+import org.microsoft.qintelipass.services.StringRedisService;
 import org.microsoft.qintelipass.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import java.util.Map;
 @Component
 public class MobileCodeLoginStrategy implements ILoginStrategy {
     @Autowired
-    private RedisService redisService;
+    private StringRedisService redisService;
     
     @Autowired
     private UserService userService;
@@ -48,7 +48,7 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
             return new ResponseBody(false, "Your account has been deactivated");
         }
         
-        String targetSmsCode = (String) redisService.getValue(phone);
+        String targetSmsCode = redisService.getValue(phone);
 
         if (targetSmsCode != null) {
             if (targetSmsCode.equals(smsCode)){

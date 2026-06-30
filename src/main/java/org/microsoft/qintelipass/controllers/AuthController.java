@@ -5,6 +5,8 @@ import org.microsoft.qintelipass.ILoginStrategy;
 import org.microsoft.qintelipass.LoginStrategyFactory;
 import org.microsoft.qintelipass.request.LoginRequest;
 import org.microsoft.qintelipass.response.ResponseBody;
+import org.microsoft.qintelipass.services.ISmsService;
+import org.microsoft.qintelipass.services.SmsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -21,6 +22,8 @@ import java.util.Map;
 public class AuthController {
     @Autowired
     private LoginStrategyFactory factory;
+    @Autowired
+    private SmsServiceImpl smsService;
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest formData){
         String loginType = formData.getLoginType();
@@ -33,5 +36,14 @@ public class AuthController {
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @PostMapping("/sendcode")
+    public ResponseEntity<?> sendCode(@RequestBody Map<String, String> payload){
+        if (payload.get("phone") != null){
+            String code = smsService.sendSmsCode(payload.get("phone"));
+            log.info("Sent sms code: {}", code);
+        }
+        return ResponseEntity.badRequest().body(new ResponseBody(false, "phone number should not be null,"));
     }
 }
