@@ -8,17 +8,12 @@ import java.util.List;
 @Service
 public interface UserService {
     User getUserById(Long userId);
-
     User getUserByPhone(String phone);
-
     User getUserByWechatOpenId(String wechatOpenId);
     List<User> getAllUsers();
-
     void saveUser(User user);
-
     boolean deactivateUser(Long userId);
-
     boolean isUserDeactivated(Long userId);
-
     User findByUsername(String username);
+    User login(String username, String password);
 }
