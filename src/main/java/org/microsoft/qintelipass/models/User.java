@@ -30,7 +30,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private UserStatus status = UserStatus.NORMAL;
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", nullable = false, unique = true)
     private String name;
     @CreationTimestamp
     @Column(name = "joined_at", nullable = false, updatable = false)

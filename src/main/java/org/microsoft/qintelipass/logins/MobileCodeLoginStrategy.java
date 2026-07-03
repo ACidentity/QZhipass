@@ -31,30 +31,53 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
     }
 
     @Override
-    public ResponseBody authenticate(Map<String, Object> params) {
-        String phone = (String) params.get("phone_number");
-        String smsCode = (String) params.get("sms");
+    public ResponseBody<User> authenticate(Map<String, Object> params) {
+        if (params == null || params.isEmpty()){
+            return ResponseBody.<User>builder().success(false).build();
+        }
+        String phone = (String) params.get("mobile");
+        String smsCode = (String) params.get("smsCode");
         log.info("User phone: {}, User smsCode: {}", phone, smsCode);
         
         if (smsCode == null || phone == null){
-            return ResponseBody.builder().success(false).message("smsCode or phone number could not be NULL.").build();
+            return ResponseBody
+                    .<User>builder()
+                    .success(false)
+                    .message("smsCode or phone number could not be NULL.")
+                    .build();
         }
         if (this.validate(phone, smsCode)){
-            return ResponseBody.builder().success(false).message("Invalid smsCode or phone.").build();
+            return ResponseBody
+                    .<User>builder()
+                    .success(false)
+                    .message("Invalid smsCode or phone.")
+                    .build();
         }
         
         User user = userService.getUserByPhone(phone);
         if (user != null && UserStatus.DEACTIVATED.equals(user.getStatus())) {
-            return ResponseBody.builder().success(false).message("Your account has been deactivated").build();
+            return ResponseBody
+                    .<User>builder()
+                    .success(false)
+                    .message("Your account has been deactivated")
+                    .build();
         }
         
         String targetSmsCode = redisService.getValue(phone);
 
         if (targetSmsCode != null) {
             if (targetSmsCode.equals(smsCode)){
-                return ResponseBody.builder().success(true).message("Login Successful.").build();
+                return ResponseBody
+                        .<User>builder()
+                        .success(true)
+                        .message("Login Successful.")
+                        .build();
             }
         }
-        return ResponseBody.builder().success(false).message("Wrong smsCode.").build();
+        return ResponseBody
+                .<User>builder()
+                .success(false)
+                .message("Wrong smsCode.")
+                .build();
     }
 }

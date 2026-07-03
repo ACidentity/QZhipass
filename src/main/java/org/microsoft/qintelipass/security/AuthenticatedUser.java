@@ -18,17 +18,14 @@ public class AuthenticatedUser implements UserDetails {
     private Long userId;
     private String username;
     private String password;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.emptyList();
     }
-
     @Override
     public String getPassword() {
         return password;
     }
-
     @Override
     public String getUsername() {
         return username;

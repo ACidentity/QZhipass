@@ -12,14 +12,12 @@ import org.microsoft.qintelipass.request.LoginRequest;
 import org.microsoft.qintelipass.request.RegisterRequest;
 import org.microsoft.qintelipass.response.ResponseBody;
 import org.microsoft.qintelipass.services.SmsServiceImpl;
-import org.microsoft.qintelipass.services.StringRedisService;
 import org.microsoft.qintelipass.services.UserDetailsServiceImpl;
 import org.microsoft.qintelipass.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -41,8 +39,6 @@ public class AuthController {
     @Autowired
     private IRegisterable registerService;
     @Autowired
-    private StringRedisService redisService;
-    @Autowired
     public AuthController(LoginStrategyFactory factory, SmsServiceImpl smsService, JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, CredentialManager credentialManager) {
         this.factory = factory;
         this.smsService = smsService;
@@ -54,21 +50,16 @@ public class AuthController {
     @CrossOrigin
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest formData, HttpServletResponse httpResponse){
-        redisService.setValue("name", "alec");
-        Object name = redisService.getValue("name");
-        System.out.println("name = " + name);
+        log.info("User response: {}", formData);
         try {
             String loginType = formData.getLoginType();
             Map<String, Object> params = formData.getCredential();
             ILoginStrategy strategy = factory.getStrategy(loginType);
-            log.info("User response: {}", formData);
             ResponseBody<User> response = strategy.authenticate(params);
-            log.info("Authenticator response: {}", response);
             User user = response.getPayload();
             if (response.isSuccess() && user != null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(user.getName());
                 String token = jwtUtil.generateToken(userDetails);
-
                 Cookie userIdCookie = new Cookie("user_id", String.valueOf(user.getId()));
                 Cookie auth = new Cookie(HEADER, token);
                 userIdCookie.setPath(COOKIE_ROOT);
@@ -80,12 +71,12 @@ public class AuthController {
                 return ResponseEntity.ok(response);
             }
             return ResponseEntity.badRequest().body(response);
-        } catch (UsernameNotFoundException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PostMapping("/sendcode")
+    @PostMapping("/send_code")
     public ResponseEntity<?> sendCode(@RequestBody Map<String, String> payload){
         if (payload.get("phone") != null){
             String code = smsService.sendSmsCode(payload.get("phone"));
@@ -106,9 +97,13 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not Logged in.");
         }
         Cookie userIdCookie = new Cookie("user_id", "");
+        Cookie auth = new Cookie("access_token", "");
         userIdCookie.setPath("/");
         userIdCookie.setMaxAge(0);
+        auth.setMaxAge(0);
+        auth.setPath("/");
         httpResponse.addCookie(userIdCookie);
+        httpResponse.addCookie(auth);
 
         return ResponseEntity.ok(Map.of("success",true,"message", "OK"));
     }

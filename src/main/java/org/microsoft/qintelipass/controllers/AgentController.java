@@ -3,6 +3,7 @@ package org.microsoft.qintelipass.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.microsoft.qintelipass.dtos.UserTokenUsageDTO;
 import org.microsoft.qintelipass.response.ResponseBody;
+import org.microsoft.qintelipass.security.SecurityUtil;
 import org.microsoft.qintelipass.services.TokenUsageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +22,12 @@ public class AgentController {
 
     @PostMapping("/call")
     public ResponseEntity<ResponseBody<Map<String, Object>>> callAgent() {
-
-//        SecurityUtil.requireAuthentication();
-        Long userId = 1L;//SecurityUtil.getCurrentUserId();
+        SecurityUtil.requireAuthentication();
+        Long userId = SecurityUtil.getCurrentUserId();
         int mockToken = 10003;
 
         log.info("Agent call requested by authenticated user: {}, estimated tokens: {}", userId, mockToken);
-
+        tokenUsageService.increaseDailyTotalTokens(mockToken);
         boolean canProceed = tokenUsageService.checkTokenLimit(userId);
         if (!canProceed) {
             UserTokenUsageDTO usage = tokenUsageService.getUserTokenUsage(userId);

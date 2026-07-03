@@ -22,23 +22,23 @@ public class WechatLoginStrategy implements ILoginStrategy {
     }
 
     @Override
-    public ResponseBody authenticate(Map<String, Object> params) {
+    public ResponseBody<User> authenticate(Map<String, Object> params) {
         String wechatOpenId = (String) params.get("wechat_openid");
         log.info("Wechat login attempt for openid: {}", wechatOpenId);
         
         if (wechatOpenId == null || wechatOpenId.isEmpty()) {
-            return ResponseBody.builder().success(false).message("Wechat openid could not be NULL.").build();
+            return ResponseBody.<User>builder().success(false).message("Wechat openid could not be NULL").build();
         }
         
         User user = userService.getUserByWechatOpenId(wechatOpenId);
         if (user == null) {
-            return ResponseBody.builder().success(false).message("User not found.").build();
+            return ResponseBody.<User>builder().success(false).message("User not found").build();
         }
         
         if (UserStatus.DEACTIVATED.equals(user.getStatus())) {
-            return ResponseBody.builder().success(false).message("Your account has been deactivated").build();
+            return ResponseBody.<User>builder().success(false).message("Your account has been deactivated").build();
         }
         
-        return ResponseBody.builder().success(true).message("Login Successful.").build();
+        return ResponseBody.<User>builder().success(true).message("Login Successful").build();
     }
 }

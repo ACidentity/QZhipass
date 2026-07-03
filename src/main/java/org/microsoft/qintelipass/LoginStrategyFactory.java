@@ -1,10 +1,12 @@
 package org.microsoft.qintelipass;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class LoginStrategyFactory {
     private final Map<String, ILoginStrategy> strategyMap;
@@ -16,8 +18,9 @@ public class LoginStrategyFactory {
         );
     }
 
-    public ILoginStrategy getStrategy(String loginType) {
+    public ILoginStrategy getStrategy(String loginType) throws IllegalArgumentException{
         ILoginStrategy strategy = strategyMap.get(loginType);
+
         if (strategy == null) {
             throw new IllegalArgumentException("Unsupported Login Type: " + loginType);
         }

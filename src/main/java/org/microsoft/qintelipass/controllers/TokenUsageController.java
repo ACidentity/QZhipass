@@ -60,7 +60,6 @@ public class TokenUsageController {
 class TokenUsageAdminController {
     @Autowired
     private TokenUsageService tokenUsageService;
-
     @GetMapping("/rank")
     public ResponseEntity<ResponseBody<List<TokenUsageRankDTO>>> getDailyRank(
             @RequestParam(value = "topN", defaultValue = "10") int topN) {
@@ -102,5 +101,27 @@ class TokenUsageAdminController {
                 .success(true)
                 .message("Token limit updated successfully")
                 .build());
+    }
+
+    @GetMapping("/statistics/total/consumption")
+    public ResponseEntity<?> tokenStat(){
+        Map<String, Object> stat = Map.of(
+                "tokens", tokenUsageService.getTodayTotalTokens()
+        );
+        return ResponseEntity.ok().body(stat);
+    }
+    @GetMapping("/statistics/overuse/users")
+    public ResponseEntity<?> overuseUsers(){
+        Map<String, Object> stat = Map.of(
+                "count", tokenUsageService.getOveruseUsers(),
+                "percent", 0.1
+        );
+        return ResponseEntity.ok().body(stat);
+    }
+
+    @GetMapping("/statistics/models")
+    public ResponseEntity<?> tokensForModels(){
+
+        return ResponseEntity.ok().body(stat);
     }
 }

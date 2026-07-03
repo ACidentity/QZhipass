@@ -1,4 +1,4 @@
-package org.microsoft.qintelipass.configs;
+package org.microsoft.qintelipass.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
+import org.microsoft.qintelipass.ITrafficStatService;
 import org.microsoft.qintelipass.models.User;
-import org.microsoft.qintelipass.security.AuthenticatedUser;
 import org.microsoft.qintelipass.services.UserService;
 import org.microsoft.qintelipass.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +24,13 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final ITrafficStatService trafficStatService;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserService userService) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserService userService, ITrafficStatService trafficStatService) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
+        this.trafficStatService = trafficStatService;
     }
 
     @Override
@@ -45,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     Long userId = null;
                     try {
                         userId = jwtUtil.extractUserId(jwt);
+                        trafficStatService.recordTraffic(userId);
                     } catch (Exception e) {
                         log.warn("Could not extract user ID from token, will try to find by username");
                     }
