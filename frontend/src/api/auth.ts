@@ -1,5 +1,5 @@
-import http, { getErrorMessage } from './http'
-import { saveLoginInfo, type LoginInfo } from './session'
+import http, {getErrorMessage} from './http'
+import {type LoginInfo, saveLoginInfo} from './session'
 
 type PortalLoginType = 'MOBILE_PWD' | 'MOBILE_CODE'
 
@@ -28,17 +28,39 @@ function readString(value: unknown) {
   return typeof value === 'string' && value.trim() ? value.trim() : ''
 }
 
+function readIdentifier(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(value)
+  }
+  return readString(value)
+}
+
+function readNumber(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+  return undefined
+}
+
 function normalizeLoginInfo(response: PortalLoginResponse, mobile: string): LoginInfo {
   if (response.success === false) {
     throw new Error(response.message || '登录失败')
   }
 
   const payload = response.data && typeof response.data === 'object' ? response.data : {}
+  const conversationPayload =
+    payload.conversation && typeof payload.conversation === 'object'
+      ? payload.conversation as Record<string, unknown>
+      : {}
   const userId =
-    readString(payload.user_id) ||
-    readString(payload.userId) ||
-    readString(response.user_id) ||
-    readString(response.userId)
+    readIdentifier(payload.user_id) ||
+    readIdentifier(payload.userId) ||
+    readIdentifier(response.user_id) ||
+    readIdentifier(response.userId)
   const accessToken =
     readString(payload.access_token) ||
     readString(payload.accessToken) ||
@@ -47,6 +69,10 @@ function normalizeLoginInfo(response: PortalLoginResponse, mobile: string): Logi
     readString(response.accessToken) ||
     readString(response.token) ||
     readString(response.message)
+  const initialConversationId =
+    readNumber(payload.initialConversationId) ||
+    readNumber(payload.initial_conversation_id) ||
+    readNumber(conversationPayload.id)
 
   if (!userId) {
     throw new Error('登录成功但后端未返回 user_id')
@@ -58,7 +84,8 @@ function normalizeLoginInfo(response: PortalLoginResponse, mobile: string): Logi
 
   return {
     userId,
-    accessToken
+    accessToken,
+    initialConversationId
   }
 }
 
