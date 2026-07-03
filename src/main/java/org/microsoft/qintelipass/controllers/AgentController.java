@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -21,12 +22,13 @@ public class AgentController {
     private TokenUsageService tokenUsageService;
 
     @PostMapping("/call")
-    public ResponseEntity<ResponseBody<Map<String, Object>>> callAgent() {
+    public ResponseEntity<ResponseBody<Map<String, Object>>> callAgent(
+            @RequestParam(value = "modelId", defaultValue = "1") Long modelId) {
         SecurityUtil.requireAuthentication();
         Long userId = SecurityUtil.getCurrentUserId();
         int mockToken = 10003;
 
-        log.info("Agent call requested by authenticated user: {}, estimated tokens: {}", userId, mockToken);
+        log.info("Agent call requested by authenticated user: {}, modelId: {}, estimated tokens: {}", userId, modelId, mockToken);
         tokenUsageService.increaseDailyTotalTokens(mockToken);
         boolean canProceed = tokenUsageService.checkTokenLimit(userId);
         if (!canProceed) {
@@ -42,7 +44,7 @@ public class AgentController {
 
         log.info("Agent call processing for user: {}", userId);
 
-        tokenUsageService.recordTokenUsage(userId, mockToken);
+        tokenUsageService.recordTokenUsage(userId, modelId, mockToken);
 
         UserTokenUsageDTO updatedUsage = tokenUsageService.getUserTokenUsage(userId);
 

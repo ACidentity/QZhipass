@@ -120,7 +120,54 @@ class TokenUsageAdminController {
     }
 
     @GetMapping("/statistics/models")
-    public ResponseEntity<?> tokensForModels(){
-        return ResponseEntity.ok().body("");
+    public ResponseEntity<ResponseBody<Map<String, Object>>> tokensForModels() {
+        SecurityUtil.requireAuthentication();
+        log.info("Getting model statistics requested by admin user: {}", SecurityUtil.getCurrentUserId());
+
+        Map<String, Object> statistics = tokenUsageService.getModelStatisticsForLast7Days();
+        return ResponseEntity.ok(ResponseBody.<Map<String, Object>>builder()
+                .success(true)
+                .message("Model statistics retrieved successfully")
+                .payload(statistics)
+                .build());
+    }
+
+    @GetMapping("/statistics/active/users")
+    public ResponseEntity<ResponseBody<Map<String, Object>>> getActiveUsers() {
+        SecurityUtil.requireAuthentication();
+        log.info("Getting active users count requested by admin user: {}", SecurityUtil.getCurrentUserId());
+
+        Long count = tokenUsageService.getActiveUserCount();
+        return ResponseEntity.ok(ResponseBody.<Map<String, Object>>builder()
+                .success(true)
+                .message("Active users count retrieved successfully")
+                .payload(Map.of("count", count))
+                .build());
+    }
+
+    @GetMapping("/statistics/department")
+    public ResponseEntity<ResponseBody<Map<String, Object>>> getDepartmentStatistics() {
+        SecurityUtil.requireAuthentication();
+        log.info("Getting department statistics requested by admin user: {}", SecurityUtil.getCurrentUserId());
+
+        Map<String, Object> statistics = tokenUsageService.getDepartmentStatistics();
+        return ResponseEntity.ok(ResponseBody.<Map<String, Object>>builder()
+                .success(true)
+                .message("Department statistics retrieved successfully")
+                .payload(statistics)
+                .build());
+    }
+
+    @GetMapping("/statistics/users")
+    public ResponseEntity<ResponseBody<List<Map<String, Object>>>> getAllUserTokenUsage() {
+        SecurityUtil.requireAuthentication();
+        log.info("Getting all user token usage requested by admin user: {}", SecurityUtil.getCurrentUserId());
+
+        List<Map<String, Object>> usageList = tokenUsageService.getAllUserTokenUsage();
+        return ResponseEntity.ok(ResponseBody.<List<Map<String, Object>>>builder()
+                .success(true)
+                .message("All user token usage retrieved successfully")
+                .payload(usageList)
+                .build());
     }
 }

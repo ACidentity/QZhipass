@@ -18,6 +18,7 @@ public class UserDTO {
     private String email;
     private UserStatus status = UserStatus.NORMAL;
     private String name;
+    private String department;
     private OffsetDateTime joinedAt = OffsetDateTime.now();
 
     public static UserDTO fromUser(User user) {
@@ -27,6 +28,7 @@ public class UserDTO {
                 .email(user.getEmail())
                 .status(user.getStatus())
                 .name(user.getName())
+                .department(user.getDepartment())
                 .joinedAt(user.getJoinedAt())
                 .build();
     }
@@ -38,6 +40,7 @@ public class UserDTO {
         user.setEmail(this.email);
         user.setStatus(this.status);
         user.setName(this.name);
+        user.setDepartment(this.department);
         return user;
     }
 }

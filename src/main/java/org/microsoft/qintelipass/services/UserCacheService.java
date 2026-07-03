@@ -19,9 +19,11 @@ public class UserCacheService {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
-
+    private final ObjectMapper objectMapper;
     @Autowired
-    private ObjectMapper objectMapper;
+    public UserCacheService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     public void cacheUser(UserDTO user) {
         try {

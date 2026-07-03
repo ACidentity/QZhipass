@@ -32,6 +32,8 @@ public class User {
     private UserStatus status = UserStatus.NORMAL;
     @Column(name = "username", nullable = false, unique = true)
     private String name;
+    @Column(name = "department")
+    private String department;
     @CreationTimestamp
     @Column(name = "joined_at", nullable = false, updatable = false)
     private OffsetDateTime joinedAt = OffsetDateTime.now();

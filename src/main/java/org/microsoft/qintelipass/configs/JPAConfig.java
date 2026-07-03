@@ -1,9 +1,9 @@
 package org.microsoft.qintelipass.configs;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@AutoConfiguration
+@Configuration
 @EnableJpaAuditing
 public class JPAConfig {
 }

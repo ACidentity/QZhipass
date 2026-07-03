@@ -1,8 +1,8 @@
 package org.microsoft.qintelipass.configs;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-@AutoConfiguration
+@Configuration
 public class WebMvcConfigurer implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry){
