@@ -10,6 +10,11 @@ import java.util.Map;
 @Component
 public class LoginStrategyFactory {
     private final Map<String, ILoginStrategy> strategyMap;
+    private static final Map<String, String> LOGIN_TYPE_ALIASES = Map.of(
+            "MOBILE_CODE", "smsLogin",
+            "SMS_LOGIN", "smsLogin",
+            "smsLogin", "smsLogin"
+    );
 
     public LoginStrategyFactory(Map<String, ILoginStrategy> strategyMap) {
         this.strategyMap = new HashMap<>();
@@ -18,9 +23,9 @@ public class LoginStrategyFactory {
         );
     }
 
-    public ILoginStrategy getStrategy(String loginType) throws IllegalArgumentException{
-        ILoginStrategy strategy = strategyMap.get(loginType);
-
+    public ILoginStrategy getStrategy(String loginType) {
+        String normalizedLoginType = LOGIN_TYPE_ALIASES.getOrDefault(loginType, loginType);
+        ILoginStrategy strategy = strategyMap.get(normalizedLoginType);
         if (strategy == null) {
             throw new IllegalArgumentException("Unsupported Login Type: " + loginType);
         }

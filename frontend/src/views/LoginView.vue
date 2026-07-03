@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { Lock, Message, Phone, User } from '@element-plus/icons-vue'
+import {computed, onBeforeUnmount, reactive, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
+import {Lock, Message, Phone, User} from '@element-plus/icons-vue'
 import BrandLogo from '../components/BrandLogo.vue'
-import { isValidMobile, sendSmsCode } from '../api/auth'
-import { useAuthStore } from '../stores/auth'
+import {isValidMobile, sendSmsCode} from '../api/auth'
+import {useAuthStore} from '../stores/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,7 +39,7 @@ const canSubmitSms = computed(
 const smsCodeButtonText = computed(() => (countdown.value > 0 ? `${countdown.value}s` : '获取验证码'))
 
 async function redirectAfterLogin() {
-  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/home'
+  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/chat'
   await router.push(redirect)
 }
 

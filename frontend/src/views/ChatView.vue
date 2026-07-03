@@ -1,17 +1,33 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+<<<<<<< HEAD
+import {type Component, computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue'
+import {ElMessage} from 'element-plus'
+import {useRouter} from 'vue-router'
+import BrandLogo from '../components/BrandLogo.vue'
+import http, {getErrorMessage} from '../api/http'
+import {readLoginInfo, saveInitialConversationId} from '../api/session'
+import {useAuthStore} from '../stores/auth'
+
+=======
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
 import {
   Bell,
   ChatDotSquare,
+<<<<<<< HEAD
   Document,
   Download,
   EditPen,
+=======
+  Download,
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
   Headset,
   Histogram,
   HomeFilled,
   Paperclip,
+<<<<<<< HEAD
   Promotion,
+=======
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
   Search,
   Setting,
   Share,
@@ -19,18 +35,30 @@ import {
   Upload,
   UserFilled,
 } from '@element-plus/icons-vue'
-import BrandLogo from '../components/BrandLogo.vue'
+<<<<<<< HEAD
 
 const router = useRouter()
+=======
+
+const router = useRouter()
+const authStore = useAuthStore()
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
 
 // ========== state ==========
 const searchQuery = ref('')
 const inputText = ref('')
 const selectedModel = ref('gpt4-omni')
 const selectedAgent = ref('data-analyst')
+<<<<<<< HEAD
 const selectedChatId = ref(1)
 const showModelDropdown = ref(false)
 const showAgentDropdown = ref(false)
+=======
+const selectedChatId = ref<number | null>(null)
+const showModelDropdown = ref(false)
+const showAgentDropdown = ref(false)
+const creatingConversation = ref(false)
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
 
 const tokenLimit = 100000
 const tokenUsed = 64000
@@ -50,6 +78,7 @@ const agents = [
   { value: 'coder', label: 'Code Assistant Agent' },
 ]
 
+<<<<<<< HEAD
 const chats = [
   { id: 1, title: 'Q4 数据分析报告撰写', icon: Document },
   { id: 2, title: '品牌营销文案优化', icon: Promotion },
@@ -57,6 +86,32 @@ const chats = [
   { id: 4, title: '用户反馈情绪分析', icon: ChatDotSquare },
   { id: 5, title: '竞品市场调研总结', icon: Search },
 ]
+=======
+interface ApiResponse<T> {
+  success?: boolean
+  message?: string
+  data?: T
+}
+
+interface ConversationPayload {
+  id: number
+  title?: string
+  modelKey?: string | null
+}
+
+interface ChatItem {
+  id: number
+  title: string
+  icon: Component
+}
+
+interface CreateConversationOptions {
+  silent?: boolean
+  persistAsInitial?: boolean
+}
+
+const chats = ref<ChatItem[]>([])
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
 
 interface Message {
   id: number
@@ -65,6 +120,7 @@ interface Message {
   timestamp: string
   actions?: string[]
 }
+<<<<<<< HEAD
 const messages = ref<Message[]>([
   {
     id: 1,
@@ -113,6 +169,13 @@ const messages = ref<Message[]>([
 const chatContainer = ref<HTMLElement>()
 
 const currentChat = computed(() => chats.find(c => c.id === selectedChatId.value))
+=======
+const messages = ref<Message[]>([])
+
+const chatContainer = ref<HTMLElement>()
+
+const currentChat = computed(() => chats.value.find(c => c.id === selectedChatId.value))
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
 const charCount = computed(() => inputText.value.length)
 const maxChars = 2000
 
@@ -120,6 +183,72 @@ function selectChat(id: number) {
   selectedChatId.value = id
 }
 
+<<<<<<< HEAD
+=======
+function activateConversation(conversation: ConversationPayload) {
+  const title = conversation.title || '新建对话'
+  const existing = chats.value.find(chat => chat.id === conversation.id)
+
+  if (existing) {
+    existing.title = title
+  } else {
+    chats.value.unshift({
+      id: conversation.id,
+      title,
+      icon: ChatDotSquare
+    })
+  }
+
+  selectedChatId.value = conversation.id
+  messages.value = []
+  inputText.value = ''
+}
+
+function initializeConversationFromLogin() {
+  const loginInfo = readLoginInfo()
+  if (!loginInfo?.initialConversationId) {
+    void createNewConversation({ silent: true, persistAsInitial: true })
+    return
+  }
+
+  activateConversation({
+    id: loginInfo.initialConversationId,
+    title: '新建对话'
+  })
+}
+
+async function createNewConversation(options: CreateConversationOptions = {}) {
+  if (creatingConversation.value) return
+
+  creatingConversation.value = true
+  try {
+    const { data } = await http.post<ApiResponse<ConversationPayload>>('/v1/conversations', {
+      modelKey: selectedModel.value
+    })
+    const conversation = data.data
+
+    if (!conversation?.id) {
+      throw new Error(data.message || '新建对话失败')
+    }
+
+    activateConversation(conversation)
+    if (options.persistAsInitial) {
+      saveInitialConversationId(conversation.id)
+    }
+    await nextTick(scrollToBottom)
+    if (!options.silent) {
+      ElMessage.success('已创建新对话')
+    }
+  } catch (error) {
+    if (!options.silent) {
+      ElMessage.error(getErrorMessage(error, '新建对话失败'))
+    }
+  } finally {
+    creatingConversation.value = false
+  }
+}
+
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
 function selectModel(val: string) {
   selectedModel.value = val
   showModelDropdown.value = false
@@ -140,6 +269,10 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+<<<<<<< HEAD
+=======
+  initializeConversationFromLogin()
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
   window.addEventListener('keydown', handleGlobalKeydown)
 })
 
@@ -183,7 +316,12 @@ function scrollToBottom() {
 }
 
 function logout() {
+<<<<<<< HEAD
   router.push('/login')
+=======
+  authStore.logout()
+  router.replace('/login')
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
 }
 
 watch(
@@ -225,10 +363,19 @@ const agentLabel = computed(() => agents.find(a => a.value === selectedAgent.val
       <!-- New chat button -->
       <div class="px-4 pt-4">
         <button
+<<<<<<< HEAD
           class="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98]"
         >
           <el-icon :size="16"><ChatDotSquare /></el-icon>
           + 开启新会话
+=======
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          :disabled="creatingConversation"
+          @click="createNewConversation()"
+        >
+          <el-icon :size="16"><ChatDotSquare /></el-icon>
+          {{ creatingConversation ? '创建中...' : '+ 开启新会话' }}
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5
         </button>
       </div>
 
@@ -486,4 +633,8 @@ const agentLabel = computed(() => agents.find(a => a.value === selectedAgent.val
       </div>
     </div>
   </div>
+<<<<<<< HEAD
 </template>
+=======
+</template>
+>>>>>>> 8d4d8a4948b45c46435d75543f870cc3da9af7b5

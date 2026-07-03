@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class SmsServiceImpl implements ISmsService{
     @Autowired
-    private StringRedisService redisService;
+    private RedisService redisService;
 
     @Override
     public String sendSmsCode(String phoneNumber) {
