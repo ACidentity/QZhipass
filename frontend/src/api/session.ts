@@ -1,16 +1,23 @@
 export interface LoginInfo {
   userId: string
   accessToken: string
+  role?: string
   initialConversationId?: number
 }
 
 const USER_ID_KEY = 'user_id'
 const ACCESS_TOKEN_KEY = 'access_token'
+const ROLE_KEY = 'user_role'
 const INITIAL_CONVERSATION_ID_KEY = 'initial_conversation_id'
 
 export function saveLoginInfo(data: LoginInfo) {
   window.localStorage.setItem(USER_ID_KEY, data.userId)
   window.localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken)
+  if (data.role) {
+    window.localStorage.setItem(ROLE_KEY, data.role)
+  } else {
+    window.localStorage.removeItem(ROLE_KEY)
+  }
   if (data.initialConversationId) {
     saveInitialConversationId(data.initialConversationId)
   } else {
@@ -43,9 +50,14 @@ export function readLoginInfo(): LoginInfo | null {
 export function clearLoginInfo() {
   window.localStorage.removeItem(USER_ID_KEY)
   window.localStorage.removeItem(ACCESS_TOKEN_KEY)
+  window.localStorage.removeItem(ROLE_KEY)
   window.localStorage.removeItem(INITIAL_CONVERSATION_ID_KEY)
 }
 
 export function isLoggedIn() {
   return Boolean(readLoginInfo())
+}
+
+export function isAdmin() {
+  return window.localStorage.getItem(ROLE_KEY) === 'ADMIN'
 }
