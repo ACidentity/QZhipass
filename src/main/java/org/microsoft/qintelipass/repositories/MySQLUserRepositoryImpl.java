@@ -19,7 +19,7 @@ import java.util.Optional;
  * 移除此类上 @Primary 的注释，或将 RedisUserRepositoryImpl 上的 @Primary 移除
  */
 @Repository
-// @Primary  // 取消注释以启用 MySQL 实现
+@Primary  // 启用 MySQL 作为数据存储
 public class MySQLUserRepositoryImpl implements UserRepository {
 
     @Autowired(required = false)

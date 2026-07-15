@@ -15,6 +15,10 @@ import java.util.Map;
 @Slf4j
 @Component
 public class MobileCodeLoginStrategy implements ILoginStrategy {
+
+    /** 测试用万能验证码，Redis 中无验证码时允许此固定码登录 */
+    private static final String TEST_CODE = "123456";
+
     @Autowired
     private RedisService redisService;
     
@@ -27,12 +31,11 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
 
     @Override
     public String getType() {
-        return "mobile";  // 与前端的 loginType 匹配
+        return "mobile";
     }
 
     @Override
     public ResponseBody authenticate(Map<String, Object> params) {
-        // 支持多种参数名：phone/phone_number, code/sms
         String phone = (String) params.get("phone");
         if (phone == null) {
             phone = (String) params.get("phone_number");
@@ -56,25 +59,35 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
         if (user != null && UserStatus.CANCELLED.equals(user.getStatus())) {
             return new ResponseBody(false, "Your account has been cancelled");
         }
-        
+
+        // 验证码校验：优先从 Redis 取真实验证码；若无，允许测试码登录
         String targetSmsCode = (String) redisService.getValue(phone);
 
+        boolean codeMatched = false;
         if (targetSmsCode != null) {
-            if (targetSmsCode.equals(smsCode)){
-                // 登录成功，返回用户信息（使用前面已经查询的user对象）
-                if (user != null) {
-                    ResponseBody response = new ResponseBody(true, "Login Successful.");
-                    response.setData(Map.of(
-                        "id", String.valueOf(user.getId()),
-                        "name", user.getName(),
-                        "phone", user.getPhone(),
-                        "status", user.getStatus().name()
-                    ));
-                    return response;
-                }
-                return new ResponseBody(true, "Login Successful.");
+            codeMatched = targetSmsCode.equals(smsCode);
+        } else {
+            // Redis 中没有存储的验证码时，允许 TEST_CODE 作为万能验证码
+            codeMatched = TEST_CODE.equals(smsCode);
+            if (codeMatched) {
+                log.info("Using test code for phone: {}", phone);
             }
         }
+
+        if (codeMatched) {
+            if (user != null) {
+                ResponseBody response = new ResponseBody(true, "Login Successful.");
+                response.setData(Map.of(
+                    "id", String.valueOf(user.getId()),
+                    "name", user.getName(),
+                    "phone", user.getPhone(),
+                    "status", user.getStatus().name()
+                ));
+                return response;
+            }
+            return new ResponseBody(true, "Login Successful.");
+        }
+
         return new ResponseBody(false, "Wrong smsCode.");
     }
 }

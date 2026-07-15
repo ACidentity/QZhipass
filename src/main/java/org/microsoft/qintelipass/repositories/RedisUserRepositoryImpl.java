@@ -22,7 +22,7 @@ import java.util.Optional;
  * 2. 生产阶段：创建 MySQLUserRepositoryImpl，修改配置即可切换
  */
 @Repository
-@Primary
+// @Primary  // MVP阶段启用；切换到MySQL时注释掉
 public class RedisUserRepositoryImpl implements UserRepository {
 
     @Autowired
