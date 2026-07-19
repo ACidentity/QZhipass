@@ -10,4 +10,5 @@ public interface CensorKeywordRepository extends JpaRepository<CensorKeyword, Lo
         JpaSpecificationExecutor<CensorKeyword> {
 
     List<CensorKeyword> findByEnabledTrue();
+    List<CensorKeyword> findAllByOrderByCreatedAtDesc();
 }
