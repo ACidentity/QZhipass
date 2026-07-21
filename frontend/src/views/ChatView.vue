@@ -10,46 +10,40 @@ import {useAuthStore} from '../stores/auth'
 import {
   Bell,
   ChatDotSquare,
-  Download,
+  Document,
+  EditPen,
   Headset,
-  Histogram,
-  HomeFilled,
   Paperclip,
+  Promotion,
   Search,
   Setting,
-  Share,
   SwitchButton,
-  Upload,
   UserFilled,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-
 // ========== state ==========
 const searchQuery = ref('')
 const inputText = ref('')
-const selectedModel = ref('deepseek-chat')
+const selectedModel = ref('gpt4-omni')
 const selectedAgent = ref('data-analyst')
+
 const selectedChatId = ref<number | null>(null)
 const showModelDropdown = ref(false)
 const showAgentDropdown = ref(false)
 const creatingConversation = ref(false)
-const aiLoading = ref(false)
 
 const tokenLimit = 100000
 const tokenUsed = 64000
 const tokenPercent = computed(() => Math.round((tokenUsed / tokenLimit) * 100))
 
-/** Model keys that have an active API key on the backend. */
-const configuredModels = new Set(['deepseek-v4', 'deepseek-chat'])
-
 const models = [
-  { value: 'deepseek-chat', label: 'DeepSeek (默认)', dot: 'green' },
-  { value: 'gpt4-omni', label: 'GPT-4 Omni', dot: 'grey' },
-  { value: 'gpt4-turbo', label: 'GPT-4 Turbo', dot: 'grey' },
-  { value: 'claude-3.5', label: 'Claude 3.5 Sonnet', dot: 'grey' },
-  { value: 'qwen3', label: '千问3', dot: 'grey' },
+  { value: 'gpt4-omni', label: 'GPT-4 Omni' },
+  { value: 'gpt4-turbo', label: 'GPT-4 Turbo' },
+  { value: 'claude-3.5', label: 'Claude 3.5 Sonnet' },
+  { value: 'qwen3', label: '千问3' },
+  { value: 'deepseek-v4', label: 'DeepSeek-V4' },
 ]
 
 const agents = [
@@ -58,6 +52,13 @@ const agents = [
   { value: 'coder', label: 'Code Assistant Agent' },
 ]
 
+const chats = [
+  { id: 1, title: 'Q4 数据分析报告撰写', icon: Document },
+  { id: 2, title: '品牌营销文案优化', icon: Promotion },
+  { id: 3, title: '产品需求文档梳理', icon: EditPen },
+  { id: 4, title: '用户反馈情绪分析', icon: ChatDotSquare },
+  { id: 5, title: '竞品市场调研总结', icon: Search },
+]
 interface ApiResponse<T> {
   success?: boolean
   message?: string
@@ -81,7 +82,6 @@ interface CreateConversationOptions {
   persistAsInitial?: boolean
 }
 
-const chats = ref<ChatItem[]>([])
 
 interface Message {
   id: number
@@ -90,11 +90,55 @@ interface Message {
   timestamp: string
   actions?: string[]
 }
-const messages = ref<Message[]>([])
+const messages = ref<Message[]>([
+  {
+    id: 1,
+    role: 'user',
+    content: '请帮我分析 Q4 销售数据，生成一份综合报告，包含趋势图和关键指标。',
+    timestamp: '10:28 AM',
+  },
+  {
+    id: 2,
+    role: 'ai',
+    content:
+      '好的，我已经完成了 **Q4 销售数据的分析**。以下是主要发现：\n\n1. **总销售额**：¥8,420万，同比增长 12.4%\n2. **线上渠道占比**：首次突破 45%\n3. **华东地区** 增长最快，达到 18.7%\n4. **客单价** 提升至 ¥2,840（+5.2%）\n\n建议重点关注以下数据维度进行深入分析。',
+    timestamp: '10:28 AM',
+    actions: ['生成柱状图', '导出 PPT 提纲', '查看原始数据'],
+  },
+  {
+    id: 3,
+    role: 'user',
+    content: '好的，请帮我生成趋势图和导出 PPT 提纲。另外把华东地区的细节数据给我看看。',
+    timestamp: '10:35 AM',
+  },
+  {
+    id: 4,
+    role: 'ai',
+    content:
+      '已为您生成趋势图并导出 PPT 提纲。\n\n### 📊 趋势图已生成\n- **月度销售趋势图**：显示 10-12 月逐月增长\n- **渠道分布饼图**：线上 45%、线下 55%\n- **区域对比柱状图**：华东领跑\n\n### 📄 PPT 提纲\n1. Q4 整体业绩概览\n2. 各渠道销售表现\n3. 区域市场分析\n4. 产品品类 TOP 10\n5. 2025 Q1 展望\n\n华东地区详细数据已整理如下表...',
+    timestamp: '10:35 AM',
+    actions: ['下载 PPT', '分享报告'],
+  },
+  {
+    id: 5,
+    role: 'user',
+    content: '非常好，请帮我把这个报告分享给管理层，并添加一段简短的总结。',
+    timestamp: '10:42 AM',
+  },
+  {
+    id: 6,
+    role: 'ai',
+    content:
+      '报告已准备完毕，分享链接已生成。\n\n### 📋 执行摘要\n\nQ4 业绩表现强劲，总销售额达 ¥8,420 万，同比增长 12.4%。线上渠道贡献显著提升，华东市场持续引领增长。建议 Q1 重点加大线上投入，并借鉴华东成功经验推广至其他区域。\n\n已为您生成分享链接，有效期 7 天。',
+    timestamp: '10:42 AM',
+    actions: ['复制分享链接', '预览报告'],
+  },
+])
+
 
 const chatContainer = ref<HTMLElement>()
 
-const currentChat = computed(() => chats.value.find(c => c.id === selectedChatId.value))
+const currentChat = computed(() => chats.find(c => c.id === selectedChatId.value))
 const charCount = computed(() => inputText.value.length)
 const maxChars = 2000
 
@@ -104,12 +148,12 @@ function selectChat(id: number) {
 
 function activateConversation(conversation: ConversationPayload) {
   const title = conversation.title || '新建对话'
-  const existing = chats.value.find(chat => chat.id === conversation.id)
+  const existing = chats.find(chat => chat.id === conversation.id)
 
   if (existing) {
     existing.title = title
   } else {
-    chats.value.unshift({
+    chats.unshift({
       id: conversation.id,
       title,
       icon: ChatDotSquare
@@ -166,12 +210,7 @@ async function createNewConversation(options: CreateConversationOptions = {}) {
 }
 
 function selectModel(val: string) {
-  if (!configuredModels.has(val)) {
-    ElMessage.warning('当前模型没有接入，已自动切换为 DeepSeek')
-    selectedModel.value = 'deepseek-chat'
-  } else {
-    selectedModel.value = val
-  }
+  selectedModel.value = val
   showModelDropdown.value = false
 }
 
@@ -203,9 +242,9 @@ function selectAgent(val: string) {
   showAgentDropdown.value = false
 }
 
-async function sendMessage() {
+function sendMessage() {
   const text = inputText.value.trim()
-  if (!text || aiLoading.value) return
+  if (!text) return
   messages.value.push({
     id: Date.now(),
     role: 'user',
@@ -217,31 +256,7 @@ async function sendMessage() {
     }),
   })
   inputText.value = ''
-  await nextTick(scrollToBottom)
-
-  aiLoading.value = true
-  try {
-    const { data } = await http.post('/ai/chat', {
-      message: text,
-      modelKey: selectedModel.value
-    })
-    const aiContent = data?.content ?? data?.data?.content ?? ''
-    messages.value.push({
-      id: Date.now() + 1,
-      role: 'ai',
-      content: aiContent,
-      timestamp: new Date().toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      }),
-    })
-  } catch (error) {
-    ElMessage.error(getErrorMessage(error, 'AI 回复失败'))
-  } finally {
-    aiLoading.value = false
-    await nextTick(scrollToBottom)
-  }
+  nextTick(scrollToBottom)
 }
 
 function handleKeydown(e: KeyboardEvent) {
@@ -258,6 +273,7 @@ function scrollToBottom() {
 }
 
 function logout() {
+  router.push('/login')
   authStore.logout()
   router.replace('/login')
 }
@@ -301,6 +317,10 @@ const agentLabel = computed(() => agents.find(a => a.value === selectedAgent.val
       <!-- New chat button -->
       <div class="px-4 pt-4">
         <button
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98]"
+        >
+          <el-icon :size="16"><ChatDotSquare /></el-icon>
+          + 开启新会话
           class="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="creatingConversation"
           @click="createNewConversation()"
@@ -485,11 +505,6 @@ const agentLabel = computed(() => agents.find(a => a.value === selectedAgent.val
                   @click.stop="selectModel(m.value)"
                 >
                   <span class="flex-1 text-left">{{ m.label }}</span>
-                  <span
-                    class="inline-block h-2 w-2 rounded-full shrink-0"
-                    :class="m.dot === 'green' ? 'bg-green-500' : 'bg-gray-300'"
-                    :title="m.dot === 'green' ? '已接入' : '未接入'"
-                  ></span>
                   <svg v-if="selectedModel === m.value" class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                   </svg>
@@ -556,7 +571,7 @@ const agentLabel = computed(() => agents.find(a => a.value === selectedAgent.val
               </span>
               <button
                 class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-                :disabled="!inputText.trim() || aiLoading"
+                :disabled="!inputText.trim()"
                 @click="sendMessage"
               >
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -570,3 +585,4 @@ const agentLabel = computed(() => agents.find(a => a.value === selectedAgent.val
     </div>
   </div>
 </template>
+

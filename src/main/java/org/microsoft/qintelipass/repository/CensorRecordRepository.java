@@ -1,13 +1,11 @@
 package org.microsoft.qintelipass.repository;
 
-import org.microsoft.qintelipass.entity.CensorRecord;
+import org.microsoft.qintelipass.models.CensorRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
 public interface CensorRecordRepository extends JpaRepository<CensorRecord, Long> {
 
     long countByUserIdAndCreatedAtBetween(Long userId,
@@ -16,7 +14,7 @@ public interface CensorRecordRepository extends JpaRepository<CensorRecord, Long
 
     Page<CensorRecord> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
-    Page<CensorRecord> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    Page<CensorRecord> findAllByOrderByCreatedAtDesc();
 
     Page<CensorRecord> findByUsernameContainingOrHitKeywordsContainingAllIgnoreCaseOrderByCreatedAtDesc(
             String username, String keyword, Pageable pageable);

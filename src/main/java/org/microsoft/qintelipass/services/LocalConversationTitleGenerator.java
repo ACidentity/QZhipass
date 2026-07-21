@@ -1,6 +1,6 @@
 package org.microsoft.qintelipass.services;
 
-import org.microsoft.qintelipass.entity.Conversation;
+import org.microsoft.qintelipass.models.Conversation;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

@@ -1,7 +1,7 @@
 package org.microsoft.qintelipass.services;
 
 import jakarta.annotation.PostConstruct;
-import org.microsoft.qintelipass.entity.CensorKeyword;
+import org.microsoft.qintelipass.models.CensorKeyword;
 import org.microsoft.qintelipass.repository.CensorKeywordRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;

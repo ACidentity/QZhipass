@@ -1,8 +1,8 @@
 package org.microsoft.qintelipass.services;
 
 import org.microsoft.qintelipass.dtos.CensorRecordDTO;
-import org.microsoft.qintelipass.entity.CensorKeyword;
-import org.microsoft.qintelipass.entity.CensorRecord;
+import org.microsoft.qintelipass.models.CensorKeyword;
+import org.microsoft.qintelipass.models.CensorRecord;
 import org.microsoft.qintelipass.repository.CensorKeywordRepository;
 import org.microsoft.qintelipass.repository.CensorRecordRepository;
 import org.springframework.data.domain.Page;
@@ -57,7 +57,7 @@ public class CensorService {
 
     @Transactional(readOnly = true)
     public List<CensorRecord> listRecords() {
-        return censorRecordRepository.findAllByOrderByCreatedAtDesc();
+        return (List<CensorRecord>) censorRecordRepository.findAllByOrderByCreatedAtDesc();
     }
 
     
@@ -133,7 +133,7 @@ public class CensorService {
 
     @Transactional(readOnly = true)
     public Page<CensorRecordDTO> listAllRecords(int page, int size) {
-        return censorRecordRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size))
+        return censorRecordRepository.findAllByOrderByCreatedAtDesc()
                 .map(CensorRecordDTO::from);
     }
 

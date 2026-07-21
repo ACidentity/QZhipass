@@ -32,40 +32,37 @@ public class PasswordLoginStrategy implements ILoginStrategy {
         String password = (String) params.get("password");
 
         if (phone == null || password == null) {
-            return new ResponseBody(false, "Phone number and password are required.");
+            return ResponseBody.builder().success(true).message("Phone number and password are required.").build();
         }
 
         User user = userService.getUserByPhone(phone);
         if (user == null) {
-            return new ResponseBody(false, "User not found.");
+            return ResponseBody.builder().success(true).message("User not found.").build();
         }
 
         // Check account status
         if (UserStatus.CANCELLED.equals(user.getStatus())) {
-            return new ResponseBody(false, "Your account has been cancelled.");
+            return ResponseBody.builder().success(true).message("Your account has been cancelled.").build();
         }
         if (UserStatus.FROZEN.equals(user.getStatus())) {
-            return new ResponseBody(false, "Your account has been frozen.");
+            return ResponseBody.builder().success(true).message("Your account has been frozen.").build();
         }
 
         // BCrypt password verification
         String storedPassword = user.getPassword();
         if (storedPassword == null || storedPassword.isEmpty()) {
-            return new ResponseBody(false, "Password not set. Please use SMS login.");
+            return ResponseBody.builder().success(true).message("Password not set. Please use SMS login.").build();
         }
 
         if (!encoder.matches(password, storedPassword)) {
-            return new ResponseBody(false, "Invalid password.");
+            return ResponseBody.builder().success(true).message("Invalid password.").build();
         }
-
         // Login success
-        ResponseBody response = new ResponseBody(true, "Login Successful.");
-        response.setData(Map.of(
+        return ResponseBody.builder().success(true).message("Login Successful.").payload(Map.of(
             "id", String.valueOf(user.getId()),
             "name", user.getName(),
             "phone", user.getPhone(),
             "status", user.getStatus().name()
-        ));
-        return response;
+        )).build();
     }
 }

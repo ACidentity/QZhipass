@@ -10,7 +10,6 @@ import org.microsoft.qintelipass.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Slf4j
@@ -37,8 +36,8 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
 
     @Override
     public ResponseBody authenticate(Map<String, Object> params) {
-        String phone = readString(params, "phone_number", "phone", "mobile");
-        String smsCode = readString(params, "sms", "smsCode", "sms_code");
+        String phone = (String) params.get("phone");
+        String smsCode = (String) params.get("smsCode");
         log.info("SMS login request received.");
         if (!StringUtils.hasText(smsCode) || !StringUtils.hasText(phone)){
             return ResponseBody
@@ -56,7 +55,7 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
         }
         
         User user = userService.getUserByPhone(phone);
-        if (user != null && UserStatus.DEACTIVATED.equals(user.getStatus())) {
+        if (user != null && UserStatus.CANCELLED.equals(user.getStatus())) {
             return ResponseBody
                     .<User>builder()
                     .success(false)
@@ -80,18 +79,19 @@ public class MobileCodeLoginStrategy implements ILoginStrategy {
 
         if (codeMatched) {
             if (user != null) {
-                ResponseBody response = new ResponseBody(true, "Login Successful.");
-                response.setData(Map.of(
+                return ResponseBody.builder().success(true).payload(Map.of(
                     "id", String.valueOf(user.getId()),
                     "name", user.getName(),
                     "phone", user.getPhone(),
                     "status", user.getStatus().name()
-                ));
-                return response;
+                )).build();
             }
-            return new ResponseBody(true, "Login Successful.");
+            return ResponseBody.builder().success(true).payload("Login Successful.").build();
         }
-
-        return new ResponseBody(false, "Wrong smsCode.");
+        return ResponseBody
+                .<User>builder()
+                .success(false)
+                .message("Wrong smsCode.")
+                .build();
     }
 }

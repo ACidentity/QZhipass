@@ -1,12 +1,11 @@
 package org.microsoft.qintelipass.interceptors;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.microsoft.qintelipass.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class UserStatusInterceptor implements HandlerInterceptor {
@@ -28,7 +27,7 @@ public class UserStatusInterceptor implements HandlerInterceptor {
         
         if (userId != null) {
             // 3. 检查用户是否已停用
-            if (userService.isUserCancelled(userId)) {
+            if (userService.isUserDeactivated(userId)) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
                 response.setContentType("application/json");
                 response.getWriter().write("{\"success\":false,\"message\":\"Your account has been cancelled\",\"code\":\"USER_CANCELLED\"}");

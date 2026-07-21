@@ -1,5 +1,6 @@
 package org.microsoft.qintelipass.services;
 
+import org.microsoft.qintelipass.entity.AiModelConfig;
 import org.microsoft.qintelipass.exceptions.BadRequestException;
 import org.microsoft.qintelipass.repository.AiModelConfigRepository;
 import org.microsoft.qintelipass.response.ModelResponse;
@@ -12,11 +13,15 @@ import java.util.Optional;
 
 @Service
 // 统一处理模型列表查询和 modelKey 可用性校验。
-public class AiModelService {
+public class AiModelService implements ModelService{
     private final AiModelConfigRepository modelConfigRepository;
 
     public AiModelService(AiModelConfigRepository modelConfigRepository) {
         this.modelConfigRepository = modelConfigRepository;
+    }
+    @Override
+    public Optional<AiModelConfig> findModelById(Long id){
+        return modelConfigRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
