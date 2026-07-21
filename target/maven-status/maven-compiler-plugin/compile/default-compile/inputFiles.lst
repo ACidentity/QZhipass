@@ -48,6 +48,7 @@ E:\X19\Development\Qintelipass\src\main\java\org\microsoft\qintelipass\logins\Pa
 E:\X19\Development\Qintelipass\src\main\java\org\microsoft\qintelipass\logins\WechatLoginStrategy.java
 E:\X19\Development\Qintelipass\src\main\java\org\microsoft\qintelipass\LoginStrategyFactory.java
 E:\X19\Development\Qintelipass\src\main\java\org\microsoft\qintelipass\models\AiModelConfig.java
+E:\X19\Development\Qintelipass\src\main\java\org\microsoft\qintelipass\models\CanceledUser.java
 E:\X19\Development\Qintelipass\src\main\java\org\microsoft\qintelipass\models\CensorKeyword.java
 E:\X19\Development\Qintelipass\src\main\java\org\microsoft\qintelipass\models\CensorRecord.java
 E:\X19\Development\Qintelipass\src\main\java\org\microsoft\qintelipass\models\Conversation.java

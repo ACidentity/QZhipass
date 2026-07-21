@@ -16,7 +16,6 @@ public interface UserService {
     boolean isUserDeactivated(Long userId);
     User findByUsername(String username);
     User createAccount(String name, String department, String email, String phone, String wechat, String password);
-
     User loginByPassword(String phone, String password);
 
     boolean isUserActive(String phone);

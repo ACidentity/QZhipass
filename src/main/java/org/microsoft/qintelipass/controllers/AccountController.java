@@ -66,36 +66,6 @@ public class AccountController {
         }
     }
 
-    @PostMapping({"/login"})
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String phone = (String)body.get("phone");
-        String password = (String)body.get("password");
-        if (phone != null && password != null) {
-            try {
-                User user = this.userService.loginByPassword(phone, password);
-                if (user == null) {
-                    return ResponseEntity.badRequest().body(ResponseBody.builder().success(false).message("手机号或密码错误").build());
-                } else {
-                    Map<String, Object> data = new LinkedHashMap();
-                    data.put("userId", user.getId());
-                    data.put("name", user.getName());
-                    data.put("phone", user.getPhone());
-                    data.put("department", user.getDepartment());
-                    data.put("status", user.getStatus().name());
-                    data.put("message", "登录成功");
-                    return ResponseEntity.ok(data);
-                }
-            } catch (IllegalStateException var6) {
-                return ResponseEntity.status(403).body(ResponseBody.builder().success(false).message(var6.getMessage()).build());
-            } catch (Exception var7) {
-                log.error("登录失败", var7);
-                return ResponseEntity.badRequest().body(ResponseBody.builder().success(false).message("登录失败: " + var7.getMessage()).build());
-            }
-        } else {
-            return ResponseEntity.badRequest().body(ResponseBody.builder().success(false).message("手机号或密码不能为空").build());
-        }
-    }
-
     @GetMapping({"/status"})
     public ResponseEntity<?> checkStatus(@RequestParam String phone) {
         try {

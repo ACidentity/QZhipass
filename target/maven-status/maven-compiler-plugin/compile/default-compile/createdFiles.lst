@@ -13,6 +13,7 @@ org\microsoft\qintelipass\services\LoginService.class
 org\microsoft\qintelipass\repository\ConversationMessageRepository.class
 org\microsoft\qintelipass\controllers\UserController.class
 org\microsoft\qintelipass\controllers\AgentController.class
+org\microsoft\qintelipass\models\CanceledUser.class
 org\microsoft\qintelipass\util\ExpirationTimeHelper.class
 org\microsoft\qintelipass\scheduler\tasks\DailyAggregationTask.class
 org\microsoft\qintelipass\logins\MobilePasswordStrategy.class

@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", updatable = false, nullable = false, unique = true)
     private Long id = Snowflake.nextId();
     @Column(name = "phone", nullable = false, unique = true)
@@ -35,14 +34,12 @@ public class User {
     @Column(name = "department")
     private String department;
     @CreationTimestamp
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    private LocalDateTime cancelledAt;
     @Column(length = 50)
     private String wechat;
 

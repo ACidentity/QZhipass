@@ -127,7 +127,17 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest payload) {
-        User registered = registerService.register(payload, payload.getPassword());
+        User registered;
+        try {
+            registered = registerService.register(payload, payload.getPassword());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of(
+                            "success", false,
+                            "message", e.getMessage()
+                    ));
+        }
         Map<String, Object> responseBody = new HashMap<>();
 
         if (registered != null) {
@@ -148,7 +158,7 @@ public class AuthController {
                     .badRequest()
                     .body(Map.of(
                             "success", false,
-                            "message", "Information is not completed with integrity, cloud not register."
+                            "message", "Information is not completed, cloud not register."
                     ));
 
         }

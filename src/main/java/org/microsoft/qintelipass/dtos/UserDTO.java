@@ -19,7 +19,7 @@ public class UserDTO {
     private UserStatus status = UserStatus.NORMAL;
     private String name;
     private String department;
-    private LocalDateTime joinedAt = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     public static UserDTO fromUser(User user) {
         return UserDTO.builder()
@@ -29,7 +29,7 @@ public class UserDTO {
                 .status(user.getStatus())
                 .name(user.getName())
                 .department(user.getDepartment())
-                .joinedAt(user.getCreatedAt())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 

@@ -52,6 +52,7 @@ public class UserServiceImpl implements UserService {
         user.setWechat(wechat);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setStatus(UserStatus.NORMAL);
+        user.setCreatedAt(LocalDateTime.now());
         user.setRestored(false);
 
         User saved = userRepository.save(user);
@@ -74,7 +75,6 @@ public class UserServiceImpl implements UserService {
         existing.setWechat(wechat);
         existing.setPasswordHash(passwordEncoder.encode(password));
         existing.setStatus(UserStatus.NORMAL);
-        existing.setCancelledAt(null);
         existing.setRestored(true);
 
         User saved = userRepository.save(existing);
@@ -142,7 +142,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByPhone(phone)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         user.setStatus(UserStatus.CANCELLED);
-        user.setCancelledAt(LocalDateTime.now());
+//        user.setCancelledAt(LocalDateTime.now());
         userRepository.save(user);
         log.info("用户已注销: phone={}", phone);
     }
